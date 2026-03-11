@@ -1,6 +1,12 @@
 # data
 *.csv
 *.parquet
+*.gz.parquet.crc
+input/
+output/
+
+# macOS
+.DS_Store
 
 # macOS
 .DS_Store
