@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import when, col, avg
+from pyspark.sql.functions import col, avg
 from pyspark.sql.types import *
 
 
@@ -10,6 +10,10 @@ def handler(event, context):
         .getOrCreate()
 
     try:
+        bucket_name = "navique"
+        s3_input_path = f"s3a://{bucket_name}/input"
+        s3_output_path = f"s3a://{bucket_name}/output"
+
         # TODO sjo: If the input data were unreliable and not super clean, I could add schema definitions for strong typing instead of using inferSchema.
         #accounts_schema = StructType([
         #    StructField("account_id", IntegerType(), nullable=False),
@@ -18,14 +22,14 @@ def handler(event, context):
         #    StructField("date", DateType(), nullable=False)
         #])
         # read source files
-        accounts = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv("input/account.csv")
-        cards = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv("input/card.csv")
-        clients = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv("input/client.csv")
-        dispositions = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv("input/disp.csv")
-        districts = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv("input/district.csv")
-        loans = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv("input/loan.csv")
-        orders = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv("input/order.csv")
-        transactions = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv("input/trans.csv")
+        accounts = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv(f"{s3_input_path}/account.csv")
+        cards = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv(f"{s3_input_path}/card.csv")
+        clients = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv(f"{s3_input_path}/client.csv")
+        dispositions = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv(f"{s3_input_path}/disp.csv")
+        districts = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv(f"{s3_input_path}/district.csv")
+        loans = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv(f"{s3_input_path}/loan.csv")
+        orders = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv(f"{s3_input_path}/order.csv")
+        transactions = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv(f"{s3_input_path}/trans.csv")
 
         # TODO sjo: irl, I could change the datatype of amount and balance to decimal
         #transactions = transactions \
@@ -47,7 +51,7 @@ def handler(event, context):
         transaction_filtered.write \
             .mode("overwrite") \
             .option("compression", "gzip") \
-            .parquet("output/cleaned-transactions.parquet.gzip")
+            .parquet(f"{s3_output_path}/cleaned-transactions.parquet.gzip")
 
         # calculate avg loan amt per district, save to csv
         loan_w_district = loans.select("loan_id", "account_id", "amount") \
@@ -67,7 +71,7 @@ def handler(event, context):
             .mode("overwrite") \
             .option("sep", ";") \
             .option("header", True) \
-            .csv("output/aggregations/avg-loan-by-district.csv")
+            .csv(f"{s3_output_path}/aggregations/avg-loan-by-district.csv")
 
         print("Processing successful.")
         return {"status": "success"}
