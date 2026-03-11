@@ -5,8 +5,9 @@
 input/
 output/
 
-# macOS
+# macOS, PyCharm
 .DS_Store
+.idea/
 
 # macOS
 .DS_Store
