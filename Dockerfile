@@ -11,6 +11,6 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 # --no-cache-dir to not bloat my docker image with installation cache
 
-COPY spark_process.py .
+COPY src/spark_process.py .
 
 CMD [ "spark_process.handler" ]
