@@ -1,6 +1,11 @@
 FROM public.ecr.aws/lambda/python:3.11
 
-RUN yum install -y java-17-amazon-corretto-devel
+# spark tries to run pc and fails if I don't install it
+RUN yum install -y java-17-amazon-corretto-devel procps tar && yum clean all
+
+# set java home
+ENV JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto.x86_64
+ENV PATH=$PATH:$JAVA_HOME/bin
 
 WORKDIR ${LAMBDA_TASK_ROOT}
 
