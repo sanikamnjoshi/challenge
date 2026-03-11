@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.11-slim-bookworm
 
 # headless jre because I won't need any GUI components
 RUN apt-get update && \
