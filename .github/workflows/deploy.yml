@@ -36,11 +36,11 @@ jobs:
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }} $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-      - name: Inject AWS Account ID into Task Definition
+      - name: replace AWS account ID placeholder with repo secret in task definition
         run: |
           sed -i "s/AWS_ACCOUNT_ID/${{ secrets.AWS_ACCOUNT_ID }}/g" task-definition.json
 
-      - name: Fill in the new image ID in the ECS task definition
+      - name: fill in the new image ID in task definition
         id: render-task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
@@ -48,7 +48,7 @@ jobs:
           container-name: spark-app
           image: ${{ steps.login-ecr.outputs.registry }}/spark-process-repo:${{ github.sha }}
 
-      - name: Register the new ECS task definition
+      - name: register the new ECS task definition
         run: |
           aws ecs register-task-definition \
             --cli-input-json file://${{ steps.render-task-def.outputs.task-definition }}

@@ -3,7 +3,7 @@ from pyspark.sql.functions import col, avg
 from pyspark.sql.types import *
 
 
-def handler(event, context):
+def main():
     spark = SparkSession.builder \
         .appName("BankDataProcessor") \
         .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262") \
@@ -87,3 +87,7 @@ def handler(event, context):
     finally:
         spark.stop()
         print("SparkSession stopped.")
+
+
+if __name__ == "__main__":
+    main()
