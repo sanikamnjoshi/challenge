@@ -38,5 +38,5 @@ jobs:
       - name: update AWS Lambda w new image
         run: |
           aws lambda update-function-code \
-            --function-name BankDataPipeline \
+            --function-name BankDataProcessor \
             --image-uri ${{ steps.login-ecr.outputs.registry }}/spark-process-repo:${{ github.sha }}
