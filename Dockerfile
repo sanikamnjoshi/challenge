@@ -1,25 +1,18 @@
-FROM public.ecr.aws/lambda/python:3.11
+FROM python:3.11-slim
 
-# spark tries to run pc and fails if I don't install it
-RUN yum install -y java-17-amazon-corretto-devel procps tar && yum clean all
+# headless jre because I won't need any GUI components
+RUN apt-get update && \
+    apt-get install -y openjdk-17-jre-headless procps && \
+    rm -rf /var/lib/apt/lists/*
 
-# set java home
-ENV JAVA_HOME=/usr/lib/jvm/java-17-amazon-corretto.x86_64
-ENV PATH=$PATH:$JAVA_HOME/bin
+RUN java -version
 
-WORKDIR ${LAMBDA_TASK_ROOT}
+WORKDIR /app
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 # --no-cache-dir to not bloat my docker image with installation cache
 
-ENV SPARK_HOME=/var/lang/lib/python3.11/site-packages/pyspark
-ENV PATH=$PATH:$SPARK_HOME/bin
-
-# explicitly set the python version to use for pyspark
-ENV PYSPARK_PYTHON=/var/lang/bin/python3.11
-ENV PYSPARK_DRIVER_PYTHON=/var/lang/bin/python3.11
-
 COPY src/spark_process.py .
 
-CMD [ "spark_process.handler" ]
+CMD ["python", "spark_process.py"]

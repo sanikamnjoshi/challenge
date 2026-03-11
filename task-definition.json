@@ -1,0 +1,25 @@
+{
+  "family": "SparkDataTask",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "2048",
+  "memory": "4096",
+  "executionRoleArn": "arn:aws:iam::AWS_ACCOUNT_ID:role/ECSTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::AWS_ACCOUNT_ID:role/ECSSparkS3TaskRole",
+  "containerDefinitions": [
+    {
+      "name": "spark-app",
+      "image": "IMAGE_PLACEHOLDER",
+      "essential": true,
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/SparkDataTask",
+          "awslogs-region": "us-east-1",
+          "awslogs-stream-prefix": "ecs",
+          "awslogs-create-group": "true"
+        }
+      }
+    }
+  ]
+}
