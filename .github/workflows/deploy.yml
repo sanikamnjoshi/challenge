@@ -1,4 +1,4 @@
-name: Deploy Spark Pipeline
+name: deploy spark pipeline
 on:
   push:
     branches: [ main ]
