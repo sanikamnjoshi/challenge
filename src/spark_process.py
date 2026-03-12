@@ -18,15 +18,30 @@ def main():
         s3_input_path = f"s3a://{bucket_name}/input"
         s3_output_path = f"s3a://{bucket_name}/output"
 
-        # read source files using predefined schemas
-        accounts = spark.read.option("header", True).option("sep", ";").schema(SCHEMAS["accounts"]).csv(f"{s3_input_path}/account.csv")
-        cards = spark.read.option("header", True).option("sep", ";").schema(SCHEMAS["cards"]).csv(f"{s3_input_path}/card.csv")
-        clients = spark.read.option("header", True).option("sep", ";").schema(SCHEMAS["clients"]).csv(f"{s3_input_path}/client.csv")
-        dispositions = spark.read.option("header", True).option("sep", ";").schema(SCHEMAS["dispositions"]).csv(f"{s3_input_path}/disp.csv")
-        districts = spark.read.option("header", True).option("sep", ";").schema(SCHEMAS["districts"]).csv(f"{s3_input_path}/district.csv")
-        loans = spark.read.option("header", True).option("sep", ";").schema(SCHEMAS["loans"]).csv(f"{s3_input_path}/loan.csv")
-        orders = spark.read.option("header", True).option("sep", ";").schema(SCHEMAS["orders"]).csv(f"{s3_input_path}/order.csv")
-        transactions = spark.read.option("header", True).option("sep", ";").schema(SCHEMAS["transactions"]).csv(f"{s3_input_path}/trans.csv")
+        # read source files
+        file_mapping = {
+            "accounts": "account.csv",
+            "cards": "card.csv",
+            "clients": "client.csv",
+            "dispositions": "disp.csv",
+            "districts": "district.csv",
+            "loans": "loan.csv",
+            "orders": "order.csv",
+            "transactions": "trans.csv"
+        }
+
+        dfs = {
+            name: spark.read
+            .option("header", True)
+            .option("sep", ";")
+            .schema(SCHEMAS[name])
+            .csv(f"{s3_input_path}/{file_name}")
+            for name, file_name in file_mapping.items()
+        }
+
+        transactions = dfs["transactions"]
+        accounts = dfs["accounts"]
+        loans = dfs["loans"]
 
         # fix typo in transaction type
         transactions = transactions.replace(
