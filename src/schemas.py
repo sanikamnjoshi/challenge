@@ -5,20 +5,20 @@ SCHEMAS = {
         StructField("account_id", IntegerType(), nullable=False),
         StructField("district_id", IntegerType(), nullable=False),
         StructField("frequency", StringType(), nullable=False),
-        StructField("date", DateType(), nullable=False)
+        StructField("date", StringType(), nullable=False)
     ]),
 
     "cards" : StructType([
         StructField("card_id", IntegerType(), nullable=False),
         StructField("disp_id", IntegerType(), nullable=False),
         StructField("type", StringType(), nullable=False),
-        StructField("issued", DateType(), nullable=False)
+        StructField("issued", StringType(), nullable=False)
     ]),
 
     "clients" : StructType([
         StructField("client_id", IntegerType(), nullable=False),
         StructField("gender", StringType(), nullable=False),
-        StructField("birth_date", DateType(), nullable=False),
+        StructField("birth_date", StringType(), nullable=False),
         StructField("district_id", IntegerType(), nullable=False)
     ]),
 
@@ -51,7 +51,7 @@ SCHEMAS = {
     "loans" : StructType([
         StructField("loan_id", IntegerType(), nullable=False),
         StructField("account_id", IntegerType(), nullable=False),
-        StructField("date", DateType(), nullable=False),
+        StructField("date", StringType(), nullable=False),
         StructField("amount", DoubleType(), nullable=False),
         StructField("duration", IntegerType(), nullable=False),
         StructField("payments", DoubleType(), nullable=False),
@@ -70,7 +70,7 @@ SCHEMAS = {
     "transactions" : StructType([
         StructField("trans_id", IntegerType(), nullable=False),
         StructField("account_id", IntegerType(), nullable=False),
-        StructField("date", DateType(), nullable=False),
+        StructField("date", StringType(), nullable=False),
         StructField("type", StringType(), nullable=False),
         StructField("operation", StringType(), nullable=True),
         StructField("amount", DoubleType(), nullable=False),
