@@ -1,6 +1,6 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, avg
-from pyspark.sql.types import *
+from pyspark.sql.functions import avg
+from schemas import SCHEMAS
 
 
 def main():
@@ -18,35 +18,21 @@ def main():
         s3_input_path = f"s3a://{bucket_name}/input"
         s3_output_path = f"s3a://{bucket_name}/output"
 
-        # TODO sjo: If the input data were unreliable and not super clean, I could add schema definitions for strong typing instead of using inferSchema.
-        #accounts_schema = StructType([
-        #    StructField("account_id", IntegerType(), nullable=False),
-        #    StructField("district_id", IntegerType(), nullable=False),
-        #    StructField("frequency", StringType(), nullable=False),
-        #    StructField("date", DateType(), nullable=False)
-        #])
-        # read source files
-        accounts = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv(f"{s3_input_path}/account.csv")
-        cards = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv(f"{s3_input_path}/card.csv")
-        clients = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv(f"{s3_input_path}/client.csv")
-        dispositions = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv(f"{s3_input_path}/disp.csv")
-        districts = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv(f"{s3_input_path}/district.csv")
-        loans = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv(f"{s3_input_path}/loan.csv")
-        orders = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv(f"{s3_input_path}/order.csv")
-        transactions = spark.read.option("header", True).option("sep", ";").option("inferSchema", True).csv(f"{s3_input_path}/trans.csv")
-
-        # TODO sjo: irl, I could change the datatype of amount and balance to decimal
-        #transactions = transactions \
-        #    .withColumn("amount", col("amount").cast(DecimalType(14, 2))) \
-        #    .withColumn("balance", col("balance").cast(DecimalType(14, 2)))
-
+        # read source files using predefined schemas
+        accounts = spark.read.option("header", True).option("sep", ";").schema(SCHEMAS["accounts"]).csv(f"{s3_input_path}/account.csv")
+        cards = spark.read.option("header", True).option("sep", ";").schema(SCHEMAS["cards"]).csv(f"{s3_input_path}/card.csv")
+        clients = spark.read.option("header", True).option("sep", ";").schema(SCHEMAS["clients"]).csv(f"{s3_input_path}/client.csv")
+        dispositions = spark.read.option("header", True).option("sep", ";").schema(SCHEMAS["dispositions"]).csv(f"{s3_input_path}/disp.csv")
+        districts = spark.read.option("header", True).option("sep", ";").schema(SCHEMAS["districts"]).csv(f"{s3_input_path}/district.csv")
+        loans = spark.read.option("header", True).option("sep", ";").schema(SCHEMAS["loans"]).csv(f"{s3_input_path}/loan.csv")
+        orders = spark.read.option("header", True).option("sep", ";").schema(SCHEMAS["orders"]).csv(f"{s3_input_path}/order.csv")
+        transactions = spark.read.option("header", True).option("sep", ";").schema(SCHEMAS["transactions"]).csv(f"{s3_input_path}/trans.csv")
 
         # fix typo in transaction type
         transactions = transactions.replace(
             {"PRJIEM": "PRIJEM"},
             subset = ["type"]
         )
-        #transactions.groupBy("type").count().orderBy(col("count").desc()).show(30, truncate=False)  # TODO sjo: sanity check
 
         # filter non-existent account ids from transactions, save to parquet
         valid_accounts = accounts.select("account_id").dropDuplicates()
@@ -62,7 +48,6 @@ def main():
             .join(accounts.select("account_id", "district_id"),
                   on="account_id",
                   how="left")
-        #loan_w_district.show(30, truncate=False)  # TODO sjo: sanity check
 
         avg_loan_by_district = (
             loan_w_district
