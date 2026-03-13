@@ -1,5 +1,7 @@
 I figured it would be easiest to explain how I deploy and execute the code with a sequence diagram. A picture speaks a thousand words, I guess? :D
 
+this is a new line.
+
 ```mermaid
 sequenceDiagram
     autonumber
